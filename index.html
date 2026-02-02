@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>evomind | Aura Bistro Menü</title>
+    <style>
+        :root {
+            --primary: #1a0f0a;
+            --accent: #bc6c25;
+            --light: #fefae0;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            background-color: var(--light);
+            color: #333;
+            scroll-behavior: smooth;
+        }
+
+        /* Navbar & Logo */
+        nav {
+            background: var(--primary);
+            padding: 20px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            font-family: monospace;
+            font-size: 2rem;
+            font-weight: bold;
+            color: white;
+            text-transform: lowercase;
+        }
+
+        .logo span { color: var(--accent); }
+
+        .categories {
+            margin-top: 15px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .categories a {
+            color: #eee;
+            text-decoration: none;
+            font-size: 0.85rem;
+            padding: 8px 15px;
+            border: 1px solid var(--accent);
+            border-radius: 4px;
+            transition: 0.3s;
+        }
+
+        .categories a:hover { background: var(--accent); color: white; }
+
+        /* Konteyner ve Grid */
+        .container { max-width: 1200px; margin: auto; padding: 20px; }
+
+        .section-header {
+            border-bottom: 2px solid var(--accent);
+            margin: 50px 0 25px;
+            padding-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            transition: transform 0.3s;
+        }
+
+        .card:hover { transform: translateY(-8px); }
+
+        .card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background-color: #eee; /* Resim yüklenmezse gri alan görünür */
+        }
+
+        .card-content { padding: 20px; }
+        .card-content h3 { margin: 0 0 10px; font-size: 1.2rem; color: var(--primary); }
+        .price { font-weight: bold; color: var(--accent); font-size: 1.2rem; }
+
+        footer { background: var(--primary); color: white; text-align: center; padding: 40px; margin-top: 60px; }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="logo">evo<span>mind</span> × aura</div>
+    <div class="categories">
+        <a href="#kahve">Kahveler</a>
+        <a href="#yemek">Yemekler</a>
+        <a href="#tatli">Tatlılar</a>
+        <a href="#soguk">Soğuklar</a>
+    </div>
+</nav>
+
+<div class="container">
+    
+    <div class="section-header" id="kahve">
+        <h2>Sıcak Kahveler</h2>
+        <span style="color: var(--accent); font-family: monospace;">evomind selection</span>
+    </div>
+    <div class="menu-grid">
+        <div class="card"><img src="kahve-isimleri\flat-white.webp"><div class="card-content"><h3>Flat White</h3><span class="price">90 TL</span></div></div>
+        <div class="card"><img src="kahve-isimleri\cappuccino.jpg"><div class="card-content"><h3>Cappuccino</h3><span class="price">85 TL</span></div></div>
+        <div class="card"><img src="kahve-isimleri\americano.webp"><div class="card-content"><h3>Americano</h3><span class="price">75 TL</span></div></div>
+        <div class="card"><img src="kahve-isimleri\mocha.webp"><div class="card-content"><h3>Mocha</h3><span class="price">85 TL</span></div></div>
+        <div class="card"><img src="kahve-isimleri\cortado.webp"><div class="card-content"><h3>Cortado</h3><span class="price">80 TL</span></div></div>
+        <div class="card"><img src="kahve-isimleri\türk-kahvesi.jpg"><div class="card-content"><h3>Türk Kahvesi</h3><span class="price">100 TL</span></div></div>
+        <div class="card"><img src="kahve-isimleri\çay.jpg"><div class="card-content"><h3>Çay</h3><span class="price">20 TL</span></div></div>
+    </div>
+
+    <div class="section-header" id="yemek">
+        <h2>Hızlı Lezzetler</h2>
+        <span style="color: var(--accent); font-family: monospace;">evomind kitchen</span>
+    </div>
+    <div class="menu-grid">
+        <div class="card"><img src="kahve-isimleri\burger.jpg"><div class="card-content"><h3>Cheeseburger</h3><span class="price">220 TL</span></div></div>
+        <div class="card"><img src="kahve-isimleri\pizza.webp"><div class="card-content"><h3>Pizza Mix</h3><span class="price">250 TL</span></div></div>
+        <div class="card"><img src="kahve-isimleri\tavuk-sepeti.jpg"><div class="card-content"><h3>Tavuk Sepeti</h3><span class="price">180 TL</span></div></div>
+        <div class="card"><img src="kahve-isimleri\hotdog.jpg"><div class="card-content"><h3>Hot Dog</h3><span class="price">140 TL</span></div></div>
+        <div class="card"><img src="kahve-isimleri\kulup-sandvic.jpg"><div class="card-content"><h3>Club Sandviç</h3><span class="price">160 TL</span></div></div>
+        <div class="card"><img src="kahve-isimleri\tost.jpg"><div class="card-content"><h3>Tost</h3><span class="price">100 TL</span></div></div>
+    </div>
+
+    <div class="section-header" id="tatli">
+        <h2>Tatlılar</h2>
+        <span style="color: var(--accent); font-family: monospace;">evomind bakery</span>
+    </div>
+    <div class="menu-grid">
+        <div class="card"><img src="kahve-isimleri\çikolatalı-pasta.png"><div class="card-content"><h3>Çikolatalı Pasta</h3><span class="price">110 TL</span></div></div>
+        <div class="card"><img src="kahve-isimleri\san-sebastian-cheesecake.jpg"><div class="card-content"><h3>San Sebastian</h3><span class="price">130 TL</span></div></div>
+        <div class="card"><img src="kahve-isimleri\tiramisu.jpg"><div class="card-content"><h3>Tiramisu</h3><span class="price">105 TL</span></div></div>
+        <div class="card"><img src="kahve-isimleri\çilekli-turta.webp"><div class="card-content"><h3>Çilekli Turta</h3><span class="price">95 TL</span></div></div>
+        <div class="card"><img src="kahve-isimleri\waffle.webp"><div class="card-content"><h3>Waffle</h3><span class="price">150 TL</span></div></div>
+        <div class="card"><img src="kahve-isimleri\kazan-dibi.gif"><div class="card-content"><h3>Kazan Dibi</h3><span class="price">140 TL</span></div></div>
+        <div class="card"><img src="kahve-isimleri\Profiterol.webp"><div class="card-content"><h3>Profiterol</h3><span class="price">140 TL</span></div></div>
+    </div>
+
+    <div class="section-header" id="soguk">
+        <h2>Soğuk İçecekler</h2>
+        <span style="color: var(--accent); font-family: monospace;">evomind refresh</span>
+    </div>
+    <div class="menu-grid">
+        <div class="card"><img src="kahve-isimleri\limonata.jpg"><div class="card-content"><h3>Limonata</h3><span class="price">75 TL</span></div></div>
+        <div class="card"><img src="kahve-isimleri\Iced_Latte.webp"><div class="card-content"><h3>Iced Latte</h3><span class="price">95 TL</span></div></div>
+        <div class="card"><img src="kahve-isimleri\Smoothie.jpg"><div class="card-content"><h3>Smoothie</h3><span class="price">120 TL</span></div></div>
+        <div class="card"><img src="kahve-isimleri\milkshake.webp"><div class="card-content"><h3>Milkshake</h3><span class="price">115 TL</span></div></div>
+        <div class="card"><img src="kahve-isimleri\portakal-suyu.webp"><div class="card-content"><h3>Portakal Suyu</h3><span class="price">85 TL</span></div></div>
+        <div class="card"><img src="kahve-isimleri\churchill.webp"><div class="card-content"><h3>Churchill</h3><span class="price">60 TL</span></div></div>
+    </div>
+</div>
+
+<footer>
+    <div class="logo">evo<span>mind</span></div>
+    <p>Aura Bistro & Coffee © 2026</p>
+    <p style="font-size: 0.8rem; opacity: 0.6;">Keyifli Mola Noktası</p>
+</footer>
+
+</body>
+</html>
