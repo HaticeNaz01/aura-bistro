@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Aura Bistro | Menü</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #1a0f0a;
+            --accent: #bc6c25;
+            --bg: #fdfdfd;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            background-color: var(--bg);
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        /* --- ÜST BAR --- */
+        header {
+            background: var(--primary);
+            padding: 20px;
+            text-align: center;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .logo { font-size: 1.5rem; font-weight: 700; }
+        .logo span { color: var(--accent); }
+
+        .masa-tag {
+            background: var(--accent);
+            color: white;
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-top: 5px;
+        }
+
+        /* --- ANA KATEGORİ EKRANI --- */
+        #home-screen {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .category-card {
+            background: white;
+            height: 180px;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+            text-decoration: none;
+            color: var(--primary);
+            transition: 0.3s;
+            border: 1px solid #eee;
+        }
+
+        .category-card i { font-size: 2.5rem; color: var(--accent); margin-bottom: 15px; }
+        .category-card span { font-weight: 700; font-size: 1rem; }
+        .category-card:active { transform: scale(0.95); background: #f9f9f9; }
+
+        /* --- ÜRÜN LİSTELEME EKRANI (BAŞLANGIÇTA GİZLİ) --- */
+        #category-screen {
+            display: none;
+            padding: 20px;
+            animation: slideIn 0.4s ease;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            color: var(--accent);
+            font-weight: 600;
+            padding: 0;
+            margin-bottom: 20px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .section-title { font-size: 1.6rem; font-weight: 700; margin-bottom: 20px; }
+
+        .product-card {
+            background: white;
+            border-radius: 15px;
+            padding: 12px;
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            align-items: center;
+        }
+
+        .product-img { width: 80px; height: 80px; border-radius: 12px; object-fit: cover; }
+        .product-info { flex: 1; }
+        .product-info h3 { margin: 0; font-size: 1rem; }
+        .product-info p { margin: 4px 0; font-size: 0.75rem; color: #777; }
+
+        .price-row { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; }
+        .price { font-weight: 700; color: var(--accent); }
+
+        .add-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+
+        /* --- ANİMASYONLAR --- */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideIn { from { transform: translateX(100px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo">Aura <span>Bistro</span></div>
+    <div class="masa-tag" id="masa-display">Masa: --</div>
+</header>
+
+<div id="home-screen">
+    <div class="category-card" onclick="openCategory('Sıcak Kahveler', 'kahve')">
+        <i class="fas fa-mug-hot"></i>
+        <span>Sıcaklar</span>
+    </div>
+    <div class="category-card" onclick="openCategory('Soğuk İçecekler', 'soguk')">
+        <i class="fas fa-ice-cream"></i>
+        <span>Soğuklar</span>
+    </div>
+    <div class="category-card" onclick="openCategory('Hızlı Yemekler', 'yemek')">
+        <i class="fas fa-hamburger"></i>
+        <span>Yemekler</span>
+    </div>
+    <div class="category-card" onclick="openCategory('Tatlılar', 'tatli')">
+        <i class="fas fa-cookie-bite"></i>
+        <span>Tatlılar</span>
+    </div>
+    <div class="category-card" onclick="openCategory('Sıcak İçecekler', 'Çay')">
+        <i class="fas fa-mug-hot"></i>
+        <span>Sıcak İçecekler</span>
+    </div>
+</div>
+
+<div id="category-screen">
+    <button class="back-btn" onclick="goBack()"><i class="fas fa-chevron-left"></i> Geri Dön</button>
+    <div class="section-title" id="cat-title">Kategori Adı</div>
+    <div id="product-list">
+        </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyAO2RemuvkZuYHUoKqYCkxLGpkhZNXdcKQ",
+        authDomain: "aurasiparis-27cef.firebaseapp.com",
+        databaseURL: "https://aurasiparis-27cef-default-rtdb.firebaseio.com",
+        projectId: "aurasiparis-27cef",
+        storageBucket: "aurasiparis-27cef.firebasestorage.app",
+        messagingSenderId: "90780214645",
+        appId: "1:90780214645:web:601547318ff44ea9869f3c"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const masaNo = urlParams.get('masa') || "Bilinmiyor";
+    document.getElementById('masa-display').innerText = "Masa: " + masaNo;
+
+    // VERİ SETİ (Kategorilere Göre)
+    const menuData = {
+        kahve: [
+            { ad: "Flat White", fiyat: 90, resim: "kahve-isimleri/flat-white.webp"},
+            { ad: "Cappuccino", fiyat: 85, resim: "kahve-isimleri/cappuccino.jpg"},
+            { ad: "Americano", fiyat: 75, resim: "kahve-isimleri/americano.webp"},
+            { ad: "Mocha", fiyat: 85, resim: "kahve-isimleri/mocha.webp"},
+            { ad: "Cortado", fiyat: 80, resim: "kahve-isimleri/cortado.webp"},
+            { ad: "Türk Kahvesi", fiyat: 100, resim: "kahve-isimleri/türk-kahvesi.jpg"},
+            
+        ],
+        soguk: [
+            { ad: "Limonata", fiyat: 75, resim: "kahve-isimleri/limonata.jpg" },
+            { ad: "Iced Latte", fiyat: 95, resim: "kahve-isimleri/Iced_Latte.webp"},
+            { ad: "Smoothie", fiyat: 120, resim: "kahve-isimleri/Smoothie.jpg" },
+            { ad: "Milkshake", fiyat: 115, resim: "kahve-isimleri/milkshake.webp" },
+            { ad: "Portakal Suyu", fiyat: 85, resim: "kahve-isimleri/portakal-suyu.webp" },
+            { ad: "Churchill", fiyat: 80, resim: "kahve-isimleri/churchill.webp" },
+        ],
+        yemek: [
+            { ad: "Cheeseburger", fiyat: 220, resim: "kahve-isimleri/burger.jpg" },
+            { ad: "Pizza Mix", fiyat: 250, resim: "kahve-isimleri/pizza.webp" },
+            { ad: "Tavuk Sepeti", fiyat: 220, resim: "kahve-isimleri/tavuk-sepeti.jpg" },
+            { ad: "Hot Dog", fiyat: 220, resim: "kahve-isimleri/hotdog.jpg" },
+            { ad: "Club Sandiviç", fiyat: 220, resim: "kahve-isimleri/kulup-sandvic.jpg" },
+            { ad: "Tost", fiyat: 220, resim: "kahve-isimleri/tost.jpg" },
+        ],
+        tatli: [
+            { ad: "Magnolia", fiyat: 110, resim: "kahve-isimleri/magnolia.webp" },
+            { ad: "Pasta", fiyat: 110, resim: "kahve-isimleri/çikolatalı-pasta.png" },
+            { ad: "San Sebastian", fiyat: 110, resim: "kahve-isimleri/san-sebastian-cheesecake.jpg" },
+            { ad: "Tiramisu", fiyat: 110, resim: "kahve-isimleri/tiramisu.jpg" },
+            { ad: "Çilekli Turta", fiyat: 110, resim: "kahve-isimleri/çilekli-turta.webp" },
+            { ad: "Waffle", fiyat: 110, resim: "kahve-isimleri/waffle.webp" },
+            { ad: "Kazan Dibi", fiyat: 110, resim: "kahve-isimleri/kazan-dibi.gif" },
+            { ad: "Profiterol", fiyat: 110, resim: "kahve-isimleri/Profiterol.webp" },
+            { ad: "Sufle", fiyat: 110, resim: "kahve-isimleri/sufle.jpg" },
+
+        ],
+         Çay: [
+            { ad: "Çay", fiyat: 30, resim: "kahve-isimleri/çay.jpg"},
+            { ad: "Oralet", fiyat: 35, resim: "kahve-isimleri\oralet.jpeg"},
+            { ad: "Nane Limon", fiyat: 35, resim: "kahve-isimleri\nane-limon.webp"},
+            { ad: "Sahlep", fiyat: 80, resim: "kahve-isimleri\Sahlep.jpg"},
+            { ad: "Sıcak Çikolata", fiyat: 100, resim: "kahve-isimleri/sıcak-cikolata.jpg"},
+            
+        ],
+    };
+
+    function openCategory(title, key) {
+        document.getElementById('home-screen').style.display = 'none';
+        document.getElementById('category-screen').style.display = 'block';
+        document.getElementById('cat-title').innerText = title;
+        
+        const list = document.getElementById('product-list');
+        list.innerHTML = ""; // Temizle
+
+        menuData[key].forEach(item => {
+            list.innerHTML += `
+                <div class="product-card">
+                    <img src="${item.resim}" class="product-img">
+                    <div class="product-info">
+                        <h3>${item.ad}</h3>
+                        <p>${item.aciklama}</p>
+                        <div class="price-row">
+                            <span class="price">${item.fiyat} TL</span>
+                            <button class="add-btn" onclick="siparisVer('${item.ad}', ${item.fiyat})">+</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        window.scrollTo(0,0);
+    }
+
+    function goBack() {
+        document.getElementById('category-screen').style.display = 'none';
+        document.getElementById('home-screen').style.display = 'grid';
+    }
+
+    function siparisVer(urunAdi, fiyat) {
+        if(masaNo === "Bilinmiyor") return alert("QR okutulmadı!");
+        
+        if(confirm(`${urunAdi} siparişi verilsin mi?`)) {
+            database.ref('siparisler').push().set({
+                masa: masaNo,
+                urun: urunAdi,
+                fiyat: fiyat,
+                saat: new Date().toLocaleTimeString('tr-TR'),
+                durum: "Yeni"
+            }).then(() => alert("Sipariş alındı!"));
+        }
+    }
+</script>
+
+</body>
+</html>
