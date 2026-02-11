@@ -183,6 +183,22 @@
 
     const urlParams = new URLSearchParams(window.location.search);
     const masaNo = urlParams.get('masa') || "Bilinmiyor";
+    // --- OTURUM KİLİTLEME GÜVENLİK SİSTEMİ ---
+    const kilitliMasa = localStorage.getItem('aura_kilitli_masa');
+
+    if (masaNo !== "Bilinmiyor") {
+        if (!kilitliMasa) {
+            // Cihaz ilk kez bir masa okuttuysa, o masayı hafızaya kilitle
+            localStorage.setItem('aura_kilitli_masa', masaNo);
+        } else if (kilitliMasa !== masaNo) {
+            // Eğer linkteki masa ile hafızadaki uyuşmuyorsa müdahale et
+            alert(`Dikkat: Güvenlik nedeniyle sadece oturduğunuz masadan (${kilitliMasa}) sipariş verebilirsiniz.`);
+            
+            // Kullanıcıyı linki değiştirmesine rağmen kendi masasına geri gönderir
+            window.location.href = window.location.pathname + "?masa=" + kilitliMasa;
+        }
+    }
+    // ------------------------------------------
     document.getElementById('masa-display').innerText = "Masa: " + masaNo;
 
     // VERİ SETİ (Kategorilere Göre)
@@ -281,4 +297,5 @@
 </script>
 
 </body>
+
 </html>
