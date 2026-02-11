@@ -74,7 +74,7 @@
         .category-card span { font-weight: 700; font-size: 1rem; }
         .category-card:active { transform: scale(0.95); background: #f9f9f9; }
 
-        /* --- ÜRÜN LİSTELEME EKRANI (BAŞLANGIÇTA GİZLİ) --- */
+        /* --- ÜRÜN LİSTELEME EKRANI --- */
         #category-screen {
             display: none;
             padding: 20px;
@@ -123,7 +123,6 @@
             font-weight: bold;
         }
 
-        /* --- ANİMASYONLAR --- */
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideIn { from { transform: translateX(100px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
     </style>
@@ -161,8 +160,7 @@
 <div id="category-screen">
     <button class="back-btn" onclick="goBack()"><i class="fas fa-chevron-left"></i> Geri Dön</button>
     <div class="section-title" id="cat-title">Kategori Adı</div>
-    <div id="product-list">
-        </div>
+    <div id="product-list"></div>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -183,25 +181,35 @@
 
     const urlParams = new URLSearchParams(window.location.search);
     const masaNo = urlParams.get('masa') || "Bilinmiyor";
-    // --- OTURUM KİLİTLEME GÜVENLİK SİSTEMİ ---
+
+    // --- GELİŞMİŞ OTURUM VE PANEL ENTEGRASYONU ---
     const kilitliMasa = localStorage.getItem('aura_kilitli_masa');
 
     if (masaNo !== "Bilinmiyor") {
-        if (!kilitliMasa) {
-            // Cihaz ilk kez bir masa okuttuysa, o masayı hafızaya kilitle
-            localStorage.setItem('aura_kilitli_masa', masaNo);
-        } else if (kilitliMasa !== masaNo) {
-            // Eğer linkteki masa ile hafızadaki uyuşmuyorsa müdahale et
-            alert(`Dikkat: Güvenlik nedeniyle sadece oturduğunuz masadan (${kilitliMasa}) sipariş verebilirsiniz.`);
+        // Firebase'den bu masaya ait aktif sipariş var mı kontrol et
+        database.ref('siparisler').orderByChild('masa').equalTo(masaNo).on('value', snapshot => {
+            const siparisler = snapshot.val();
             
-            // Kullanıcıyı linki değiştirmesine rağmen kendi masasına geri gönderir
-            window.location.href = window.location.pathname + "?masa=" + kilitliMasa;
-        }
+            if (!siparisler) {
+                // EĞER PANELDE MASAYI BOŞALTTIYSAN: Kilidi kaldır!
+                localStorage.removeItem('aura_kilitli_masa');
+                console.log("Masa boşaltıldı, oturum sıfırlandı.");
+            } else {
+                // EĞER MASA DOLUYSA: Kilidi kontrol et
+                if (kilitliMasa && kilitliMasa !== masaNo) {
+                    alert(`Güvenlik: Zaten Masa ${kilitliMasa} üzerinde bir oturumunuz var.`);
+                    window.location.href = window.location.pathname + "?masa=" + kilitliMasa;
+                } else if (!kilitliMasa) {
+                    // İlk siparişte veya girişte masayı kilitle
+                    localStorage.setItem('aura_kilitli_masa', masaNo);
+                }
+            }
+        });
     }
     // ------------------------------------------
+
     document.getElementById('masa-display').innerText = "Masa: " + masaNo;
 
-    // VERİ SETİ (Kategorilere Göre)
     const menuData = {
         kahve: [
             { ad: "Flat White", fiyat: 90, resim: "kahve-isimleri/flat-white.webp"},
@@ -209,8 +217,7 @@
             { ad: "Americano", fiyat: 75, resim: "kahve-isimleri/americano.webp"},
             { ad: "Mocha", fiyat: 85, resim: "kahve-isimleri/mocha.webp"},
             { ad: "Cortado", fiyat: 80, resim: "kahve-isimleri/cortado.webp"},
-            { ad: "Türk Kahvesi", fiyat: 100, resim: "kahve-isimleri/türk-kahvesi.jpg"},
-            
+            { ad: "Türk Kahvesi", fiyat: 100, resim: "kahve-isimleri/türk-kahvesi.jpg"}
         ],
         soguk: [
             { ad: "Limonata", fiyat: 75, resim: "kahve-isimleri/limonata.jpg" },
@@ -218,36 +225,34 @@
             { ad: "Smoothie", fiyat: 120, resim: "kahve-isimleri/Smoothie.jpg" },
             { ad: "Milkshake", fiyat: 115, resim: "kahve-isimleri/milkshake.webp" },
             { ad: "Portakal Suyu", fiyat: 85, resim: "kahve-isimleri/portakal-suyu.webp" },
-            { ad: "Churchill", fiyat: 80, resim: "kahve-isimleri/churchill.webp" },
+            { ad: "Churchill", fiyat: 80, resim: "kahve-isimleri/churchill.webp" }
         ],
         yemek: [
-            { ad: "Cheeseburger", fiyat: 220, resim: "kahve-isimleri/burger.jpg" },
-            { ad: "Pizza Mix", fiyat: 250, resim: "kahve-isimleri/pizza.webp" },
+            { ad: "Cheeseburger", fiyat: 210, resim: "kahve-isimleri/burger.jpg" },
+            { ad: "Pizza Mix", fiyat: 200, resim: "kahve-isimleri/pizza.webp" },
             { ad: "Tavuk Sepeti", fiyat: 220, resim: "kahve-isimleri/tavuk-sepeti.jpg" },
-            { ad: "Hot Dog", fiyat: 220, resim: "kahve-isimleri/hotdog.jpg" },
-            { ad: "Club Sandiviç", fiyat: 220, resim: "kahve-isimleri/kulup-sandvic.jpg" },
-            { ad: "Tost", fiyat: 220, resim: "kahve-isimleri/tost.jpg" },
+            { ad: "Hot Dog", fiyat: 130, resim: "kahve-isimleri/hotdog.jpg" },
+            { ad: "Club Sandiviç", fiyat: 125, resim: "kahve-isimleri/kulup-sandvic.jpg" },
+            { ad: "Tost", fiyat: 170, resim: "kahve-isimleri/tost.jpg" }
         ],
         tatli: [
-            { ad: "Magnolia", fiyat: 110, resim: "kahve-isimleri/magnolia.webp" },
+            { ad: "Magnolia", fiyat: 120, resim: "kahve-isimleri/magnolia.webp" },
             { ad: "Pasta", fiyat: 110, resim: "kahve-isimleri/çikolatalı-pasta.png" },
-            { ad: "San Sebastian", fiyat: 110, resim: "kahve-isimleri/san-sebastian-cheesecake.jpg" },
-            { ad: "Tiramisu", fiyat: 110, resim: "kahve-isimleri/tiramisu.jpg" },
-            { ad: "Çilekli Turta", fiyat: 110, resim: "kahve-isimleri/çilekli-turta.webp" },
-            { ad: "Waffle", fiyat: 110, resim: "kahve-isimleri/waffle.webp" },
+            { ad: "San Sebastian", fiyat: 220, resim: "kahve-isimleri/san-sebastian-cheesecake.jpg" },
+            { ad: "Tiramisu", fiyat: 180, resim: "kahve-isimleri/tiramisu.jpg" },
+            { ad: "Çilekli Turta", fiyat: 160, resim: "kahve-isimleri/çilekli-turta.webp" },
+            { ad: "Waffle", fiyat: 200, resim: "kahve-isimleri/waffle.webp" },
             { ad: "Kazan Dibi", fiyat: 110, resim: "kahve-isimleri/kazan-dibi.gif" },
-            { ad: "Profiterol", fiyat: 110, resim: "kahve-isimleri/Profiterol.webp" },
-            { ad: "Sufle", fiyat: 110, resim: "kahve-isimleri/sufle.jpg" },
-
+            { ad: "Profiterol", fiyat: 130, resim: "kahve-isimleri/Profiterol.webp" },
+            { ad: "Sufle", fiyat: 150, resim: "kahve-isimleri/sufle.jpg" }
         ],
-         Çay: [
+        Çay: [
             { ad: "Çay", fiyat: 30, resim: "kahve-isimleri/çay.jpg"},
-            { ad: "Oralet", fiyat: 35, resim: "kahve-isimleri\oralet.jpeg"},
-            { ad: "Nane Limon", fiyat: 35, resim: "kahve-isimleri\nane-limon.webp"},
-            { ad: "Sahlep", fiyat: 80, resim: "kahve-isimleri\Sahlep.jpg"},
-            { ad: "Sıcak Çikolata", fiyat: 100, resim: "kahve-isimleri/sıcak-cikolata.jpg"},
-            
-        ],
+            { ad: "Oralet", fiyat: 35, resim: "kahve-isimleri/oralet.jpeg"},
+            { ad: "Nane Limon", fiyat: 35, resim: "kahve-isimleri/nane-limon.webp"},
+            { ad: "Sahlep", fiyat: 80, resim: "kahve-isimleri/Sahlep.jpg"},
+            { ad: "Sıcak Çikolata", fiyat: 100, resim: "kahve-isimleri/sıcak-cikolata.jpg"}
+        ]
     };
 
     function openCategory(title, key) {
@@ -256,7 +261,7 @@
         document.getElementById('cat-title').innerText = title;
         
         const list = document.getElementById('product-list');
-        list.innerHTML = ""; // Temizle
+        list.innerHTML = "";
 
         menuData[key].forEach(item => {
             list.innerHTML += `
@@ -264,7 +269,6 @@
                     <img src="${item.resim}" class="product-img">
                     <div class="product-info">
                         <h3>${item.ad}</h3>
-                        <p>${item.aciklama}</p>
                         <div class="price-row">
                             <span class="price">${item.fiyat} TL</span>
                             <button class="add-btn" onclick="siparisVer('${item.ad}', ${item.fiyat})">+</button>
@@ -291,11 +295,14 @@
                 fiyat: fiyat,
                 saat: new Date().toLocaleTimeString('tr-TR'),
                 durum: "Yeni"
-            }).then(() => alert("Sipariş alındı!"));
+            }).then(() => {
+                // İlk siparişte masayı hafızaya mühürle
+                localStorage.setItem('aura_kilitli_masa', masaNo);
+                alert("Sipariş alındı!");
+            });
         }
     }
 </script>
 
 </body>
-
 </html>
