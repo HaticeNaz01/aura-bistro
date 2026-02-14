@@ -3,45 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aura Yönetim | Stabil Sistem</title>
+    <title>Aura Yönetim Paneli</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
-        :root { --primary: #1a0f0a; --accent: #bc6c25; --success: #28a745; --bg: #f4f4f4; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 15px; }
-        
-        .section { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 25px; }
-        h2 { border-bottom: 2px solid var(--accent); padding-bottom: 10px; margin-top: 0; color: var(--primary); }
-
-        /* Mutfak Kartları */
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
-        .card { border: 2px solid #eee; padding: 15px; border-radius: 12px; text-align: center; position: relative; background: #fff; }
-        .card.yeni { border-color: var(--accent); background: #fffaf5; }
-        .masa-no { font-size: 1.4rem; font-weight: bold; color: var(--accent); }
-        .btn-teslim { background: var(--success); color: white; border: none; padding: 10px; width: 100%; border-radius: 8px; cursor: pointer; margin-top: 10px; font-weight: bold; }
-
-        /* Kasa Alanı */
-        .kasa-input { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 10px; font-size: 1.1rem; margin-bottom: 15px; }
-        .satir { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
-        .toplam-bar { background: var(--primary); color: white; padding: 15px; border-radius: 10px; display: flex; justify-content: space-between; font-weight: bold; margin-top: 10px; }
-        .btn-kapat { background: var(--success); color: white; border: none; padding: 15px; width: 100%; border-radius: 10px; cursor: pointer; margin-top: 15px; font-weight: bold; font-size: 1rem; }
+        :root { --primary: #1a0f0a; --accent: #bc6c25; --success: #2e7d32; --bg: #f8f5f2; }
+        body { font-family: 'Poppins', sans-serif; background: var(--bg); margin: 0; padding: 20px; }
+        .section { background: white; border-radius: 16px; padding: 24px; margin-bottom: 30px; box-shadow: 0 8px 30px rgba(0,0,0,0.08); }
+        h2 { color: var(--primary); font-weight: 700; margin-bottom: 20px; border-bottom: 3px solid var(--accent); padding-bottom: 12px; }
+        .kasa-input { width: 100%; padding: 14px; border: 2px solid #ddd; border-radius: 12px; font-size: 1.1rem; margin-bottom: 20px; box-sizing: border-box; }
+        .kasa-input:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px rgba(188,108,37,0.2); }
+        .satir { display: flex; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid #eee; }
+        .toplam-bar { background: var(--primary); color: white; padding: 18px; border-radius: 12px; display: flex; justify-content: space-between; font-size: 1.3rem; font-weight: 700; margin: 20px 0; }
+        .btn-kapat { background: var(--success); color: white; border: none; padding: 18px; width: 100%; border-radius: 12px; font-size: 1.2rem; font-weight: 700; cursor: pointer; transition: 0.3s; }
+        .btn-kapat:hover { background: #1b5e20; }
+        .card { background: #fff; border: 1px solid #eee; padding: 15px; border-radius: 10px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
+        .masa-no { background: var(--accent); color: white; padding: 5px 10px; border-radius: 5px; font-weight: bold; }
+        .btn-teslim { background: var(--primary); color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; }
     </style>
 </head>
 <body>
 
     <div class="section">
         <h2>👨‍🍳 Hazırlanan Siparişler</h2>
-        <div id="mutfak-liste" class="grid"></div>
+        <div id="mutfak-liste"></div>
     </div>
 
-    <div class="section" style="max-width: 500px; margin: auto;">
+    <div class="section" style="max-width: 600px; margin: 0 auto;">
         <h2>💰 Kasa / Masa Ödeme</h2>
-        <input type="number" id="kasaMasaInput" class="kasa-input" placeholder="Masa Numarası Girin..." oninput="kasaGuncelle()">
+        <input type="text" id="kasaMasaInput" class="kasa-input" placeholder="Masa Numarası (örn: 8)" oninput="kasaGuncelle()">
         
         <div id="kasa-detay">
-            <p style="text-align:center; color:#888;">Masa seçilmedi.</p>
+            <p style="text-align:center; color:#666;">Masa seçilmedi.</p>
         </div>
 
         <div class="toplam-bar">
-            <span>GENEL TOPLAM:</span>
+            <span>GENEL TOPLAM</span>
             <span id="genel-toplam">0 TL</span>
         </div>
         <button class="btn-kapat" onclick="odemeAl()">ÖDEME ALINDI & MASAYI BOŞALT</button>
@@ -63,24 +60,23 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // 1. MUTFAK DİNLEYİCİSİ (Sadece "Yeni" olanlar)
+        // MUTFAK LİSTESİ GÜNCELLEME
         db.ref('siparisler').on('value', (snapshot) => {
             const mutfakListe = document.getElementById('mutfak-liste');
             mutfakListe.innerHTML = "";
-            
             snapshot.forEach((child) => {
                 const s = child.val();
                 if (s.durum === "Yeni") {
                     mutfakListe.innerHTML += `
-                        <div class="card yeni">
-                            <span class="masa-no">MASA ${s.masa}</span>
-                            <p><strong>${s.urun}</strong></p>
-                            <small>${s.saat}</small>
+                        <div class="card">
+                            <div>
+                                <span class="masa-no">MASA ${s.masa}</span>
+                                <strong>${s.urun}</strong>
+                            </div>
                             <button class="btn-teslim" onclick="teslimEt('${child.key}')">TESLİM ET</button>
                         </div>`;
                 }
             });
-            // Kasa açıksa onu da güncelle
             kasaGuncelle();
         });
 
@@ -88,55 +84,56 @@
             db.ref('siparisler/' + id).update({ durum: "Teslim Edildi" });
         }
 
-        // 2. KASA FONKSİYONU
         function kasaGuncelle() {
-            const masaNo = document.getElementById('kasaMasaInput').value;
-            const detayAlan = document.getElementById('kasa-detay');
-            const toplamAlan = document.getElementById('genel-toplam');
-
+            let masaNo = document.getElementById('kasaMasaInput').value.trim();
             if (!masaNo) {
-                detayAlan.innerHTML = "<p style='text-align:center; color:#888;'>Masa numarası girin.</p>";
-                toplamAlan.innerText = "0 TL";
+                document.getElementById('kasa-detay').innerHTML = "<p style='text-align:center; color:#666;'>Masa numarası girin.</p>";
+                document.getElementById('genel-toplam').innerText = "0 TL";
                 return;
             }
-
-            db.ref('siparisler').orderByChild('masa').equalTo(masaNo.toString()).once('value', (snapshot) => {
+            
+            db.ref('siparisler').orderByChild('masa').equalTo(masaNo).once('value', (snapshot) => {
                 let toplam = 0;
                 let html = "";
-                
-                if (snapshot.exists()) {
-                    snapshot.forEach((child) => {
-                        const s = child.val();
-                        toplam += Number(s.fiyat || 0);
-                        const durumIkon = s.durum === "Yeni" ? "⏳" : "✅";
-                        html += `
-                            <div class="satir">
-                                <span>${durumIkon} ${s.urun}</span>
-                                <strong>${s.fiyat} TL</strong>
-                            </div>`;
-                    });
-                    detayAlan.innerHTML = html;
-                    toplamAlan.innerText = toplam + " TL";
-                } else {
-                    detayAlan.innerHTML = "<p style='text-align:center;'>Aktif sipariş bulunamadı.</p>";
-                    toplamAlan.innerText = "0 TL";
-                }
+                snapshot.forEach((child) => {
+                    const s = child.val();
+                    toplam += Number(s.fiyat || 0);
+                    const ikon = s.durum === "Yeni" ? "⏳" : "✅";
+                    html += `<div class="satir"><span>${ikon} ${s.urun}</span><strong>${s.fiyat} TL</strong></div>`;
+                });
+                document.getElementById('kasa-detay').innerHTML = html || "<p style='text-align:center; color:#666;'>Bu masada aktif sipariş yok.</p>";
+                document.getElementById('genel-toplam').innerText = toplam + " TL";
             });
         }
 
-        // 3. ÖDEME AL VE SİL
+        // --- MASAYI SIFIRLAYAN ANA FONKSİYON ---
         function odemeAl() {
-            const masaNo = document.getElementById('kasaMasaInput').value;
-            if (!masaNo) return alert("Masa seçmediniz!");
+            let masaNo = document.getElementById('kasaMasaInput').value.trim();
+            if (!masaNo) return alert("Masa numarası girmediniz!");
 
-            if (confirm("Masa " + masaNo + " hesabını kapatmak istediğinize emin misiniz?")) {
-                db.ref('siparisler').orderByChild('masa').equalTo(masaNo.toString()).once('value', (snapshot) => {
+            if (confirm(`Masa ${masaNo} ödemesi alındı ve masa boşaltılıyor. Onaylıyor musunuz?`)) {
+                // 1. O masaya ait tüm siparişleri Firebase'den tamamen sil
+                db.ref('siparisler').orderByChild('masa').equalTo(masaNo).once('value', (snapshot) => {
+                    if (!snapshot.exists()) {
+                        alert("Bu masada silinecek sipariş bulunamadı.");
+                        return;
+                    }
+
+                    let silmeIslemleri = [];
                     snapshot.forEach((child) => {
-                        child.ref.remove();
+                        silmeIslemleri.push(db.ref('siparisler/' + child.key).remove());
                     });
-                    alert("Ödeme alındı, kayıtlar silindi.");
-                    document.getElementById('kasaMasaInput').value = "";
-                    kasaGuncelle();
+
+                    // 2. Siparişler silindikten sonra masayı sıfırla
+                    Promise.all(silmeIslemleri).then(() => {
+                        return db.ref('masalar/' + masaNo).remove(); // Varsa masa kilit verisini de siler
+                    })
+                    .then(() => {
+                        alert(`Masa ${masaNo} sıfırlandı. Yeni müşteri için hazır!`);
+                        document.getElementById('kasaMasaInput').value = "";
+                        kasaGuncelle();
+                    })
+                    .catch(err => alert("Hata oluştu: " + err.message));
                 });
             }
         }
