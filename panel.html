@@ -3,12 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="Aura Bistro">
-    <meta name="msapplication-navbutton-color" content="#1a0f0a">
-    <meta name="theme-color" content="#1a0f0a">
-    <title>Aura | Elite Management</title>
+    <title>Aura | Elite Management v6</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
@@ -18,101 +13,78 @@
         .admin-container { display: grid; grid-template-columns: 1fr 400px; gap: 30px; max-width: 1600px; margin: 0 auto; }
         @media (max-width: 1100px) { .admin-container { grid-template-columns: 1fr; } }
 
-        .masa-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 20px; background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
-        .masa-kutu { height: 140px; border-radius: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; color: white; font-weight: bold; text-align: center; border: none; }
-        .masa-kutu.bos { background: var(--empty); opacity: 0.5; }
+        .masa-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        .masa-kutu { height: 120px; border-radius: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; color: white; font-weight: bold; border: 4px solid transparent; }
+        .masa-kutu.aktif { border-color: var(--accent); transform: scale(1.05); }
+        .masa-kutu.bos { background: var(--empty); opacity: 0.6; }
         .masa-kutu.bekliyor { background: var(--danger); animation: pulse 2s infinite; }
         .masa-kutu.teslim { background: var(--success); }
-        .masa-kutu i { font-size: 1.8rem; margin-bottom: 8px; }
 
-        .detay-paneli { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); position: sticky; top: 20px; height: fit-content; }
+        .detay-paneli { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); position: sticky; top: 20px; min-height: 500px; }
         
-        .siparis-item { 
-            padding: 15px; border-radius: 12px; background: #fff; border: 1px solid #eee; margin-bottom: 12px;
-            border-left: 6px solid var(--danger); transition: 0.3s; position: relative;
-        }
+        .siparis-item { padding: 10px 12px; border-radius: 12px; background: #fff; border: 1px solid #eee; margin-bottom: 8px; border-left: 6px solid var(--danger); }
         .siparis-item.teslim-edildi { border-left: 6px solid var(--success); background: #f8fff9; }
         
-        .btn-teslim-aksiyon {
-            background: #fff; border: 1px solid #ddd; padding: 8px 15px; border-radius: 25px;
-            cursor: pointer; font-size: 0.75rem; font-weight: 700; transition: 0.3s; display: flex; align-items: center; gap: 6px;
-        }
-        .btn-teslim-aksiyon:hover { border-color: var(--success); color: var(--success); }
-        .btn-teslim-aksiyon.hazir { background: var(--success); color: white; border-color: var(--success); }
+        .btn-teslim { background: var(--success); color: white; border: none; padding: 5px 12px; border-radius: 15px; cursor: pointer; font-size: 0.7rem; font-weight: 700; }
+        .btn-teslim.hazir { opacity: 0.4; pointer-events: none; }
 
-        .parcali-odeme-kutu { background: #f8f9fa; padding: 20px; border-radius: 15px; margin-top: 20px; border: 1px solid #eee; }
-        .odeme-input { width: 100%; padding: 12px; margin-bottom: 12px; border: 2px solid #ddd; border-radius: 10px; font-size: 1.1rem; text-align: center; }
-        .odeme-btn-grup { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .btn-p { border: none; padding: 14px; border-radius: 10px; color: white; cursor: pointer; font-weight: bold; font-size: 0.9rem; }
-        .btn-n { background: var(--success); box-shadow: 0 4px 10px rgba(40, 167, 69, 0.2); }
-        .btn-k { background: #007bff; box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2); }
-
-        .alt-rapor-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--primary); padding: 15px 0; display: flex; justify-content: center; gap: 20px; z-index: 500; }
-        .btn-rapor-alt { background: var(--accent); color: white; border: none; padding: 12px 30px; border-radius: 30px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 10px; }
-
-        #rapor-modal { display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:white; padding:30px; border-radius:20px; box-shadow:0 0 50px rgba(0,0,0,0.4); z-index:1000; width:90%; max-width:500px; max-height: 80vh; overflow-y: auto; }
-        .modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:999; backdrop-filter: blur(3px); }
+        .odeme-paneli { background: #f8f9fa; padding: 15px; border-radius: 15px; margin-top: 15px; border: 1px solid #ddd; }
+        .odeme-input { width: 100%; padding: 12px; margin-bottom: 10px; border: 2px solid #ccc; border-radius: 10px; text-align: center; font-size: 1.1rem; box-sizing: border-box; }
         
-        /* Tam Ekran Butonu Stili */
-        .btn-fullscreen {
-            position: fixed; bottom: 85px; right: 25px; z-index: 999;
-            background: var(--primary); color: white; border: none;
-            width: 45px; height: 45px; border-radius: 50%;
-            cursor: pointer; opacity: 0.6; transition: 0.3s;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .btn-fullscreen:hover { opacity: 1; transform: scale(1.1); }
+        .alt-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--primary); padding: 15px 0; display: flex; justify-content: center; gap: 15px; z-index: 1000; }
+        .btn-alt { background: var(--accent); color: white; border: none; padding: 10px 20px; border-radius: 25px; font-weight: bold; cursor: pointer; }
+        
+        .modal { display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:white; padding:25px; border-radius:20px; box-shadow:0 0 50px rgba(0,0,0,0.5); z-index:2000; width:90%; max-width:400px; }
+        .overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:1500; }
+
+        .btn-fullscreen { position: fixed; bottom: 80px; right: 20px; width: 45px; height: 45px; border-radius: 50%; background: var(--primary); color: white; border: none; cursor: pointer; z-index: 999; display: flex; align-items: center; justify-content: center; opacity: 0.7; }
 
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.03); } 100% { transform: scale(1); } }
     </style>
 </head>
 <body>
 
-    <button class="btn-fullscreen" onclick="tamEkranYap()" title="Tam Ekran">
-        <i class="fas fa-expand"></i>
-    </button>
-
-    <h2 style="text-align: center; color: var(--primary); font-weight: 700;">Aura Bistro | Masa Yönetimi</h2>
+    <button class="btn-fullscreen" onclick="tamEkranToggle()"><i class="fas fa-expand"></i></button>
 
     <div class="admin-container">
         <div class="masa-grid" id="masa-container"></div>
-
-        <div class="detay-paneli" id="detay-paneli">
-            <h3 id="secili-masa-no" style="margin-top:0; border-bottom: 2px solid #eee; padding-bottom: 10px;">Masa Seçin</h3>
-            <div id="masa-siparisleri"></div>
-
+        <div class="detay-paneli">
+            <h3 id="secili-masa-no" style="margin:0 0 15px 0; font-size: 1.2rem;">Masa Seçin</h3>
+            <div id="masa-siparisleri" style="max-height: 300px; overflow-y: auto;"></div>
+            
             <div id="islem-alani" style="display: none;">
-                <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 1.4rem; margin: 20px 0 10px 0;">
-                    <span>Kalan:</span> <span id="masa-toplam" style="color:var(--danger)">0 TL</span>
+                <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 1.3rem; margin: 15px 0; padding: 10px; background: #fff5f5; border-radius: 10px;">
+                    <span>KALAN:</span> <span id="masa-toplam" style="color:var(--danger)">0 TL</span>
                 </div>
-
-                <div class="parcali-odeme-kutu">
-                    <input type="number" id="odeme-tutar" class="odeme-input" placeholder="Tutar (Opsiyonel)">
-                    <div class="odeme-btn-grup">
-                        <button class="btn-p btn-n" onclick="odemeAl('Nakit')"><i class="fas fa-money-bill-wave"></i> NAKİT</button>
-                        <button class="btn-p btn-k" onclick="odemeAl('Kart')"><i class="fas fa-credit-card"></i> KART</button>
+                
+                <div class="odeme-paneli">
+                    <input type="number" id="odeme-tutar" class="odeme-input" placeholder="Tutar Gir">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                        <button onclick="hizliOdeme('Nakit')" style="background:var(--success); color:white; border:none; padding:10px; border-radius:8px; font-weight:600; cursor:pointer;">NAKİT</button>
+                        <button onclick="hizliOdeme('Kart')" style="background:#007bff; color:white; border:none; padding:10px; border-radius:8px; font-weight:600; cursor:pointer;">KART</button>
                     </div>
+                    <button onclick="masayiKapat()" style="width:100%; margin-top:8px; background:var(--primary); color:white; border:none; padding:10px; border-radius:8px; cursor:pointer; font-size: 0.8rem;">MASAYI TEMİZLE</button>
                 </div>
 
-                <div style="margin-top: 20px; display: flex; gap: 8px;">
-                    <select id="yeni-masa-no" style="flex:1; padding:10px; border-radius:10px; border:1px solid #ddd; font-family:inherit;"></select>
-                    <button onclick="masaTasi()" style="padding:10px 20px; border-radius:10px; cursor:pointer; background:#eee; border:1px solid #ddd; font-weight:600;">Taşı</button>
+                <div style="margin-top: 15px; display: flex; gap: 5px;">
+                    <select id="yeni-masa-no" style="flex:1; padding:5px; border-radius:5px; border:1px solid #ddd;"></select>
+                    <button onclick="masaTasi()" style="padding:5px 10px; border-radius:5px; background:#eee; font-size: 0.8rem; cursor:pointer;">Taşı</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="alt-rapor-bar">
-        <button class="btn-rapor-alt" onclick="gunlukRaporGoster()"><i class="fas fa-chart-pie"></i> GÜNLÜK ÖZET</button>
-        <button class="btn-rapor-alt" style="background:#495057" onclick="arsivGoster()"><i class="fas fa-archive"></i> GEÇMİŞ</button>
+    <div class="alt-bar">
+        <button class="btn-alt" onclick="raporGoster()">ÖZET</button>
+        <button class="btn-alt" style="background:#495057" onclick="arsivListele()">ARŞİV</button>
     </div>
 
-    <div class="modal-overlay" id="overlay" onclick="kapatRapor()"></div>
-    <div id="rapor-modal">
-        <h3 id="rapor-baslik" style="margin-top:0;">Günün Özeti</h3>
-        <div id="rapor-icerik"></div>
-        <button onclick="kapatRapor()" style="width:100%; padding:14px; margin-top:20px; border-radius:12px; cursor:pointer; font-weight:bold; background:#f1f3f5; border:none;">Kapat</button>
-        <button id="sifirla-btn" onclick="gunuSifirlaVeArsivle()" style="background:var(--danger); color:white; border:none; padding:14px; width:100%; border-radius:12px; cursor:pointer; margin-top:10px; font-weight:bold;">GÜNÜ KAPAT VE ARŞİVLE</button>
+    <div class="overlay" id="overlay" onclick="modalKapat()"></div>
+    <div class="modal" id="modal">
+        <h3 id="modal-baslik"></h3>
+        <div id="modal-icerik"></div>
+        <button onclick="modalKapat()" style="width:100%; padding:10px; margin-top:10px;">Kapat</button>
+        <button id="gunu-kapat-btn" onclick="gunuKapat()" style="width:100%; padding:10px; margin-top:5px; background:var(--danger); color:white; border:none; font-weight:bold; display:none;">GÜNÜ KAPAT</button>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -129,218 +101,133 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        const masaSayisi = 12;
         let aktifMasa = null;
-
-        // Tam Ekran Fonksiyonu
-        function tamEkranYap() {
-            let elem = document.documentElement;
-            if (!document.fullscreenElement) {
-                if (elem.requestFullscreen) elem.requestFullscreen();
-                else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
-                else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
-            } else {
-                if (document.exitFullscreen) document.exitFullscreen();
-            }
-        }
+        let tumSiparisler = [];
 
         const sel = document.getElementById('yeni-masa-no');
-        for(let i=1; i<=masaSayisi; i++) { sel.innerHTML += `<option value="${i}">Masa ${i}'ye Taşı</option>`; }
+        for(let i=1; i<=20; i++) sel.innerHTML += `<option value="${i}">Masa ${i}</option>`;
 
-        db.ref('siparisler').on('value', (snapshot) => {
-            const siparisler = [];
-            snapshot.forEach(child => { 
-                const s = child.val();
-                if(s.durum !== "Arsivlendi" && s.durum !== "Odendi") {
-                    siparisler.push({id: child.key, ...s}); 
-                }
-            });
-            masalariCiz(siparisler);
-            if(aktifMasa) masaDetayGoster(aktifMasa, siparisler);
+        function tamEkranToggle() {
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+            else if (document.exitFullscreen) document.exitFullscreen();
+        }
+
+        db.ref('siparisler').on('value', snap => {
+            tumSiparisler = [];
+            snap.forEach(c => { if(c.val().durum !== "Odendi") tumSiparisler.push({id:c.key, ...c.val()}); });
+            ekraniGuncelle();
         });
 
-        function masalariCiz(siparisler) {
+        function ekraniGuncelle() {
             const container = document.getElementById('masa-container');
             container.innerHTML = "";
-            for(let i=1; i<=masaSayisi; i++) {
-                const mSips = siparisler.filter(s => String(s.masa) === String(i));
+            for(let i=1; i<=20; i++) {
+                const mSips = tumSiparisler.filter(s => String(s.masa) === String(i));
                 let durum = mSips.length > 0 ? (mSips.some(s => s.durum === "Yeni") ? "bekliyor" : "teslim") : "bos";
-                let ikon = durum === "bos" ? "fa-couch" : (durum === "bekliyor" ? "fa-bell" : "fa-check");
-                container.innerHTML += `<div class="masa-kutu ${durum}" onclick="masaSec(${i})"><i class="fas ${ikon}"></i>Masa ${i}<br><small>${mSips.length} Ürün</small></div>`;
+                container.innerHTML += `<div class="masa-kutu ${durum} ${aktifMasa==i?'aktif':''}" onclick="masaSec(${i})">Masa ${i}</div>`;
+            }
+
+            if(aktifMasa) {
+                const mSips = tumSiparisler.filter(s => String(s.masa) === String(aktifMasa));
+                const liste = document.getElementById('masa-siparisleri');
+                document.getElementById('secili-masa-no').innerText = "Masa " + aktifMasa;
+                document.getElementById('islem-alani').style.display = mSips.length > 0 ? "block" : "none";
+                
+                let toplam = 0;
+                liste.innerHTML = "";
+
+                mSips.forEach(s => {
+                    toplam += Number(s.fiyat);
+                    // Sadece ürünleri göster, ödeme satırlarını listede gizle
+                    if(s.tip !== "odeme") {
+                        const isTeslim = s.durum === "Teslim Edildi";
+                        liste.innerHTML += `
+                            <div class="siparis-item ${isTeslim ? 'teslim-edildi' : ''}">
+                                <div style="display:flex; justify-content:space-between;">
+                                    <b>${s.urun}</b>
+                                    <i class="fas fa-trash" style="color:red; font-size:0.8rem;" onclick="db.ref('siparisler/${s.id}').remove()"></i>
+                                </div>
+                                <div style="display:flex; justify-content:space-between; margin-top:5px;">
+                                    <span>${s.fiyat} TL</span>
+                                    <button class="btn-teslim ${isTeslim?'hazir':''}" onclick="db.ref('siparisler/${s.id}').update({durum:'Teslim Edildi'})">${isTeslim?'Teslim':'Teslim Et'}</button>
+                                </div>
+                            </div>`;
+                    }
+                });
+                document.getElementById('masa-toplam').innerText = toplam + " TL";
             }
         }
 
-        function masaSec(no) { 
-            aktifMasa = no; 
-            db.ref('siparisler').once('value', snapshot => {
-                const sips = []; 
-                snapshot.forEach(c => { 
-                    const s = c.val();
-                    if(s.durum !== "Arsivlendi" && s.durum !== "Odendi") sips.push({id: c.key, ...s}); 
-                });
-                masaDetayGoster(no, sips);
+        function masaSec(no) { aktifMasa = no; ekraniGuncelle(); }
+
+        function hizliOdeme(tur) {
+            const val = document.getElementById('odeme-tutar').value;
+            if(!val || val <= 0) return alert("Tutar gir!");
+            // Listeye ekleme yapıyoruz ama tip:"odeme" diyerek listede görünmesini engelliyoruz
+            db.ref('siparisler').push({ urun: tur, fiyat: -Math.abs(val), masa: aktifMasa, durum: "Teslim Edildi", tip: "odeme", odemeTipi: tur });
+            document.getElementById('odeme-tutar').value = "";
+        }
+
+        function masayiKapat() {
+            if(!confirm("Masayı temizle?")) return;
+            db.ref('siparisler').once('value', snap => {
+                snap.forEach(c => { if(String(c.val().masa) === String(aktifMasa)) db.ref('siparisler/'+c.key).update({durum: "Odendi"}); });
             });
         }
 
-        function masaDetayGoster(no, tumSiparisler) {
-            const mSips = tumSiparisler.filter(s => String(s.masa) === String(no));
-            const liste = document.getElementById('masa-siparisleri');
-            document.getElementById('secili-masa-no').innerText = "Masa " + no ;
-            let toplam = 0;
-            
-            liste.innerHTML = mSips.length === 0 ? "<div style='text-align:center; padding:40px; color:#888;'>Masa boş.</div>" : "";
-            document.getElementById('islem-alani').style.display = mSips.length === 0 ? "none" : "block";
-
-            const gruplanmis = {};
-            mSips.forEach(s => {
-                const key = s.urun + "_" + s.durum; 
-                if (!gruplanmis[key]) {
-                    gruplanmis[key] = { ...s, adet: 1, toplamFiyat: Number(s.fiyat), idler: [s.id] };
-                } else {
-                    gruplanmis[key].adet += 1;
-                    gruplanmis[key].toplamFiyat += Number(s.fiyat);
-                    gruplanmis[key].idler.push(s.id);
-                }
-                toplam += Number(s.fiyat);
-            });
-
-            Object.values(gruplanmis).forEach(s => {
-                const isTeslim = s.durum === "Teslim Edildi";
-                const adetGosterge = s.adet > 1 ? `<span style="background:var(--primary); color:white; padding:2px 8px; border-radius:10px; font-size:0.8rem; margin-left:10px;">x${s.adet}</span>` : "";
-                const tumIdler = JSON.stringify(s.idler);
-
-                liste.innerHTML += `
-                    <div class="siparis-item ${isTeslim ? 'teslim-edildi' : ''}">
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <span style="font-size:1.05rem;"><b>${s.urun}</b> ${adetGosterge}</span>
-                            <i class="fas fa-times-circle" style="color:var(--danger); cursor:pointer; font-size:1.2rem;" onclick='topluIptal(${tumIdler})'></i>
-                        </div>
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px;">
-                            <span style="font-weight:700; color:var(--primary); font-size:1.1rem;">${s.toplamFiyat} TL</span>
-                            <button class="btn-teslim-aksiyon ${isTeslim ? 'hazir' : ''}" onclick='topluTeslimEt(${tumIdler})'>
-                                <i class="fas ${isTeslim ? 'fa-check-circle' : 'fa-hourglass-start'}"></i>
-                                ${isTeslim ? 'Teslim Edildi' : 'Teslim Et'}
-                            </button>
-                        </div>
-                    </div>`;
-            });
-            document.getElementById('masa-toplam').innerText = toplam + " TL";
-        }
-
-        function topluIptal(idList) {
-            if(confirm(idList.length + " adet ürünü silmek istiyor musunuz?")) {
-                idList.forEach(id => db.ref('siparisler/' + id).remove());
-            }
-        }
-
-        function topluTeslimEt(idList) {
-            idList.forEach(id => db.ref('siparisler/' + id).update({ durum: "Teslim Edildi" }));
-        }
-
-        function odemeAl(tip) {
-            const girilenTutar = parseFloat(document.getElementById('odeme-tutar').value);
-            db.ref('siparisler').once('value', snapshot => {
-                let mSips = [];
-                snapshot.forEach(c => { 
-                    const s = c.val();
-                    if(String(s.masa) === String(aktifMasa) && s.durum !== "Odendi" && s.durum !== "Arsivlendi") {
-                        mSips.push({id: c.key, ...s});
-                    }
-                });
-
-                if(isNaN(girilenTutar) || girilenTutar <= 0) {
-                    mSips.forEach(s => { db.ref('siparisler/' + s.id).update({ durum: "Odendi", odemeTipi: tip }); });
-                } else {
-                    let kalan = girilenTutar;
-                    for(let s of mSips) {
-                        if(kalan >= s.fiyat) {
-                            db.ref('siparisler/' + s.id).update({ durum: "Odendi", odemeTipi: tip });
-                            kalan -= s.fiyat;
-                        } else break;
-                    }
-                }
-                document.getElementById('odeme-tutar').value = "";
-            });
-        }
-
-        function gunlukRaporGoster(data = null, baslik = "Günün Özeti") {
-            const isArsiv = data !== null;
-            document.getElementById('sifirla-btn').style.display = isArsiv ? 'none' : 'block';
-            document.getElementById('rapor-baslik').innerText = baslik;
-
-            const process = (snapshot) => {
-                let n = 0, k = 0, u = {};
-                snapshot.forEach(c => {
-                    const s = c.val();
-                    if(s.durum === "Odendi" || (isArsiv && s.durum === "Arsivlendi")) {
-                        if(s.odemeTipi === "Nakit") n += Number(s.fiyat);
-                        else if(s.odemeTipi === "Kart") k += Number(s.fiyat);
-                        u[s.urun] = (u[s.urun] || 0) + 1;
-                    }
-                });
-                let h = `<div style="padding:20px; background:#f8f9fa; border-radius:15px; margin-bottom:20px; text-align:center; border:1px solid #eee;">
-                    <div style="font-size:2.2rem; font-weight:bold; color:var(--success);">${n+k} TL</div>
-                    <div style="display:flex; justify-content:space-around; margin-top:10px; font-weight:600; color:#555;">
-                        <span><i class="fas fa-money-bill"></i> Nakit: ${n} TL</span>
-                        <span><i class="fas fa-credit-card"></i> Kart: ${k} TL</span>
-                    </div>
-                </div><h4>Ürün Bazlı Satışlar:</h4><ul style="padding-left:15px;">`;
-                for(let x in u) h += `<li style="margin-bottom:8px;">${x}: <b style="float:right;">${u[x]} Adet</b></li>`;
-                document.getElementById('rapor-icerik').innerHTML = h + "</ul>";
-                document.getElementById('rapor-modal').style.display = 'block';
-                document.getElementById('overlay').style.display = 'block';
-            };
-            if(isArsiv) process(data); else db.ref('siparisler').once('value', process);
-        }
-
-        function gunuSifirlaVeArsivle() {
-            if(confirm("Günü kapatmak ve ödenmiş hesapları arşive taşımak istiyor musunuz?")) {
-                const tarih = new Date().toISOString().split('T')[0];
-                db.ref('siparisler').once('value', snapshot => {
-                    snapshot.forEach(c => { 
-                        if(c.val().durum === "Odendi") {
-                            db.ref('arsiv/' + tarih + '/' + c.key).set({...c.val(), durum: "Arsivlendi"});
-                            db.ref('siparisler/' + c.key).remove();
-                        }
-                    });
-                    alert("Günün tüm ödenmiş hesapları başarıyla arşivlendi.");
-                    location.reload();
-                });
-            }
-        }
-
-        function arsivGoster() {
-            db.ref('arsiv').once('value', snapshot => {
-                let h = "<div style='display:grid; gap:12px;'>";
-                if(!snapshot.exists()) h += "<p style='color:#888; text-align:center;'>Henüz arşivlenmiş gün bulunmuyor.</p>";
-                snapshot.forEach(gun => {
-                    h += `<button onclick='arsivDetay("${gun.key}")' style="padding:15px; border-radius:12px; border:1px solid #eee; background:#fff; cursor:pointer; font-weight:600; display:flex; justify-content:space-between; align-items:center; font-family:inherit;"><span>${gun.key}</span> <i class='fas fa-arrow-right' style='color:#ccc;'></i></button>`;
-                });
-                document.getElementById('rapor-icerik').innerHTML = h + "</div>";
-                document.getElementById('rapor-modal').style.display = 'block';
-                document.getElementById('overlay').style.display = 'block';
-                document.getElementById('sifirla-btn').style.display = 'none';
-                document.getElementById('rapor-baslik').innerText = "Geçmiş Arşiv";
-            });
-        }
-
-        function arsivDetay(tarih) { db.ref('arsiv/' + tarih).once('value', snapshot => { gunlukRaporGoster(snapshot, tarih + " Raporu"); }); }
-        function kapatRapor() { document.getElementById('rapor-modal').style.display = 'none'; document.getElementById('overlay').style.display = 'none'; }
-        
         function masaTasi() {
             const yeni = document.getElementById('yeni-masa-no').value;
-            db.ref('siparisler').once('value', snapshot => {
-                snapshot.forEach(c => { 
-                    const s = c.val();
-                    if(String(s.masa) === String(aktifMasa) && s.durum !== "Odendi" && s.durum !== "Arsivlendi") {
-                        db.ref('siparisler/' + c.key).update({masa: yeni});
-                    }
-                });
-                alert("Masa aktarıldı.");
+            db.ref('siparisler').once('value', snap => {
+                snap.forEach(c => { if(String(c.val().masa) === String(aktifMasa)) db.ref('siparisler/'+c.key).update({masa:yeni}); });
                 aktifMasa = yeni;
             });
         }
+
+        function raporGoster() {
+            db.ref('siparisler').once('value', snap => {
+                let n=0, k=0;
+                snap.forEach(c => {
+                    const s = c.val();
+                    if(s.durum === "Odendi") {
+                        if(s.odemeTipi === "Nakit") n += Math.abs(Number(s.fiyat));
+                        else if(s.odemeTipi === "Kart") k += Math.abs(Number(s.fiyat));
+                        else if(!s.tip) n += Number(s.fiyat);
+                    }
+                });
+                document.getElementById('modal-baslik').innerText = "Özet";
+                document.getElementById('modal-icerik').innerHTML = `<b>Nakit:</b> ${n} TL<br><b>Kart:</b> ${k} TL<br><b>Toplam:</b> ${n+k} TL`;
+                document.getElementById('gunu-kapat-btn').style.display = "block";
+                document.getElementById('modal').style.display = 'block';
+                document.getElementById('overlay').style.display = 'block';
+            });
+        }
+
+        function gunuKapat() {
+            const tarih = new Date().toLocaleDateString('tr-TR').replace(/\./g, '-');
+            db.ref('siparisler').once('value', snap => {
+                snap.forEach(c => {
+                    if(c.val().durum === "Odendi") {
+                        db.ref('arsiv/'+tarih+'/'+c.key).set({...c.val(), durum:"Arsivlendi"});
+                        db.ref('siparisler/'+c.key).remove();
+                    }
+                });
+                modalKapat(); alert("Arşivlendi.");
+            });
+        }
+
+        function arsivListele() {
+            db.ref('arsiv').once('value', snap => {
+                let h = "";
+                snap.forEach(g => { h += `<button onclick="alert('${g.key} raporu için arşivi kontrol edin.')" style="width:100%; padding:8px; margin-bottom:5px;">${g.key}</button>`; });
+                document.getElementById('modal-baslik').innerText = "Arşiv";
+                document.getElementById('modal-icerik').innerHTML = h || "Boş.";
+                document.getElementById('gunu-kapat-btn').style.display = "none";
+                document.getElementById('modal').style.display = 'block';
+                document.getElementById('overlay').style.display = 'block';
+            });
+        }
+
+        function modalKapat() { document.getElementById('modal').style.display='none'; document.getElementById('overlay').style.display='none'; }
     </script>
 </body>
 </html>
-
