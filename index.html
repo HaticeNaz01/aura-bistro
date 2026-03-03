@@ -12,6 +12,7 @@
             --accent: #bc6c25;
             --bg: #fdfdfd;
             --danger: #dc3545;
+            --success: #28a745;
         }
         body {
             font-family: 'Poppins', sans-serif;
@@ -51,6 +52,51 @@
             cursor: pointer;
             font-size: 0.95rem;
         }
+
+        /* --- SİPARİŞ MODAL --- */
+        #order-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+        .modal-content {
+            background: white;
+            width: 85%;
+            max-width: 400px;
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+            animation: popUp 0.3s ease;
+        }
+        .modal-content h3 { margin-top: 0; color: var(--primary); }
+        .modal-content textarea {
+            width: 100%;
+            height: 100px;
+            border-radius: 12px;
+            border: 1px solid #ddd;
+            padding: 12px;
+            font-family: inherit;
+            margin: 15px 0;
+            resize: none;
+            box-sizing: border-box;
+        }
+        .modal-buttons { display: flex; gap: 10px; }
+        .confirm-btn {
+            background: var(--accent);
+            color: white; border: none; flex: 2;
+            padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;
+        }
+        .cancel-btn {
+            background: #eee;
+            color: #666; border: none; flex: 1;
+            padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;
+        }
+
         #home-screen {
             padding: 20px;
             display: grid;
@@ -75,6 +121,7 @@
         .category-card i { font-size: 2.5rem; color: var(--accent); margin-bottom: 15px; }
         .category-card span { font-weight: 700; font-size: 1rem; }
         .category-card:active { transform: scale(0.95); background: #f9f9f9; }
+
         #category-screen, #siparisler-screen {
             display: none;
             padding: 20px;
@@ -123,11 +170,20 @@
             margin-bottom: 12px;
             box-shadow: 0 3px 10px rgba(0,0,0,0.05);
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            flex-direction: column;
         }
+        .siparis-main { display: flex; justify-content: space-between; align-items: center; }
         .siparis-info { flex: 1; }
         .siparis-info strong { font-size: 1.1rem; display: block; margin-bottom: 4px; }
+        .siparis-not-display {
+            background: #fdf5e6;
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            margin-top: 10px;
+            border-left: 3px solid var(--accent);
+            color: #555;
+        }
         .iptal-btn {
             background: var(--danger);
             color: white;
@@ -137,22 +193,28 @@
             font-weight: bold;
             cursor: pointer;
         }
-        .iptal-btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-        }
-        .empty-text {
-            text-align: center;
-            color: #888;
-            font-style: italic;
-            margin-top: 50px;
-            font-size: 1.1rem;
-        }
+        .iptal-btn:disabled { background: #ccc; cursor: not-allowed; }
+        .empty-text { text-align: center; color: #888; font-style: italic; margin-top: 50px; font-size: 1.1rem; }
+
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideIn { from { transform: translateX(100px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes popUp { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
     </style>
 </head>
 <body>
+
+<div id="order-modal">
+    <div class="modal-content">
+        <h3 id="modal-product-name">Ürün Adı</h3>
+        <p style="font-size: 0.8rem; color: #666;">İstediğiniz değişiklikler varsa buraya yazabilirsiniz.</p>
+        <textarea id="modal-note" placeholder="Notunuzu buraya yazın..."></textarea>
+        <div class="modal-buttons">
+            <button class="cancel-btn" onclick="closeOrderModal()">Vazgeç</button>
+            <button class="confirm-btn" id="modal-confirm-btn">Siparişi Onayla</button>
+        </div>
+    </div>
+</div>
+
 <header>
     <div class="logo">Aura <span>Bistro</span></div>
     <div style="display: flex; gap: 10px; align-items: center;">
@@ -192,7 +254,7 @@
 
 <div id="siparisler-screen">
     <button class="back-btn" onclick="goBack()"><i class="fas fa-chevron-left"></i> Geri Dön</button>
-    <div class="section-title">Siparişlerim</div>
+    <div class="section-title">Aktif Siparişlerim</div>
     <div id="siparisler-liste"></div>
 </div>
 
@@ -211,32 +273,39 @@
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
 
+    // --- CİHAZ KİMLİĞİ (KİLİT İÇİN ANAHTAR) ---
+    let cihazID = localStorage.getItem('aura_cihaz_id');
+    if (!cihazID) {
+        cihazID = 'cihaz_' + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem('aura_cihaz_id', cihazID);
+    }
+
     const urlParams = new URLSearchParams(window.location.search);
-    const masaNo = urlParams.get('masa') || "Bilinmiyor";
+    let masaNo = urlParams.get('masa') || "Bilinmiyor";
+
+    // --- KİLİT MEKANİZMASI ---
+    function kilitKontrol() {
+        database.ref('siparisler').once('value', (snapshot) => {
+            let kilitliMasa = null;
+            snapshot.forEach((child) => {
+                const s = child.val();
+                // Eğer cihazın ödenmemiş aktif bir siparişi varsa
+                if (s.cihazID === cihazID && s.durum !== 'Odendi' && s.durum !== 'Iptal' && s.durum !== 'Arsivlendi') {
+                    kilitliMasa = s.masa;
+                }
+            });
+
+            // Eğer cihaz başka masaya mühürlüyse ve şu an farklı bir masayı açmaya çalışıyorsa
+            if (kilitliMasa && String(kilitliMasa) !== String(masaNo)) {
+                alert(`Önce Masa ${kilitliMasa} üzerindeki açık hesabınızı kapatmanız gerekiyor!`);
+                window.location.href = window.location.pathname + "?masa=" + kilitliMasa;
+            }
+        });
+    }
+
+    kilitKontrol();
     document.getElementById('masa-display').innerText = "Masa: " + masaNo;
 
-    // --- KİLİT KONTROLÜ (DÜZENLENMİŞ) ---
-    const kilitliMasa = localStorage.getItem('aura_kilitli_masa');
-    if (masaNo !== "Bilinmiyor") {
-        database.ref('siparisler').orderByChild('masa').equalTo(masaNo).on('value', (snapshot) => {
-            if (!snapshot.exists()) {
-                localStorage.removeItem('aura_kilitli_masa');
-            }
-        });
-    }
-
-    if (kilitliMasa && masaNo !== "Bilinmiyor" && kilitliMasa !== masaNo) {
-        database.ref('siparisler').orderByChild('masa').equalTo(kilitliMasa).once('value', (snapshot) => {
-            if (snapshot.exists()) {
-                alert(`Masa ${kilitliMasa} üzerinde aktif hesabınız var. Ödeme yapmadan geçemezsiniz.`);
-                window.location.href = window.location.pathname + "?masa=" + kilitliMasa;
-            } else {
-                localStorage.setItem('aura_kilitli_masa', masaNo);
-            }
-        });
-    }
-
-    // --- SENİN ORİJİNAL MENÜ VERİLERİN (HİÇ DOKUNULMADI) ---
     const menuData = {
         kahve: [
             { ad: "Flat White", fiyat: 90, resim: "kahve-isimleri/flat-white.webp"},
@@ -282,10 +351,22 @@
         ]
     };
 
+    function openOrderModal(urunAdi, fiyat) {
+        document.getElementById('order-modal').style.display = 'flex';
+        document.getElementById('modal-product-name').innerText = urunAdi;
+        document.getElementById('modal-note').value = ""; 
+        document.getElementById('modal-confirm-btn').onclick = function() {
+            const not = document.getElementById('modal-note').value;
+            siparisGonder(urunAdi, fiyat, not);
+            closeOrderModal();
+        };
+    }
+
+    function closeOrderModal() { document.getElementById('order-modal').style.display = 'none'; }
+
     function openCategory(title, key) {
         document.getElementById('home-screen').style.display = 'none';
         document.getElementById('category-screen').style.display = 'block';
-        document.getElementById('siparisler-screen').style.display = 'none';
         document.getElementById('cat-title').innerText = title;
         const list = document.getElementById('product-list');
         list.innerHTML = "";
@@ -296,7 +377,7 @@
                     <h3>${item.ad}</h3>
                     <div class="price-row">
                         <span class="price">${item.fiyat} TL</span>
-                        <button class="add-btn" onclick="siparisVer('${item.ad}', ${item.fiyat})">+</button>
+                        <button class="add-btn" onclick="openOrderModal('${item.ad}', ${item.fiyat})">+</button>
                     </div>
                 </div>
             </div>`;
@@ -315,57 +396,65 @@
         document.getElementById('category-screen').style.display = 'none';
         document.getElementById('siparisler-screen').style.display = 'block';
         const liste = document.getElementById('siparisler-liste');
-        database.ref('siparisler').orderByChild('masa').equalTo(masaNo).on('value', (snapshot) => {
+        
+        database.ref('siparisler').on('value', (snapshot) => {
             liste.innerHTML = '';
             let siparisVar = false;
             snapshot.forEach((child) => {
                 const s = child.val();
-                if (s.durum !== 'Iptal') {
+                if (String(s.masa) === String(masaNo) && s.durum !== 'Iptal' && s.durum !== 'Odendi' && s.durum !== 'Arsivlendi') {
                     siparisVar = true;
                     const suan = Date.now();
-                    const besDakikaGectiMi = (suan - s.zaman) > (2 * 60 * 1000);
-                    const iptalDisabled = (besDakikaGectiMi || s.durum !== 'Yeni') ? 'disabled' : '';
+                    const ikiDakikaGectiMi = (suan - s.zaman) > (2 * 60 * 1000);
+                    const iptalDisabled = (ikiDakikaGectiMi || s.durum !== 'Yeni') ? 'disabled' : '';
+                    const notHTML = s.not ? `<div class="siparis-not-display"><strong>Not:</strong> ${s.not}</div>` : '';
+
                     liste.innerHTML += `<div class="siparis-card">
-                        <div class="siparis-info">
-                            <strong>${s.urun}</strong>
-                            <small>${s.saat} • ${s.fiyat} TL</small><br>
-                            <small>Durum: ${s.durum}</small>
+                        <div class="siparis-main">
+                            <div class="siparis-info">
+                                <strong>${s.urun}</strong>
+                                <small>${s.saat} • ${s.fiyat} TL</small><br>
+                                <small style="color:${s.durum === 'Yeni' ? 'var(--danger)' : 'var(--success)'}">Durum: ${s.durum}</small>
+                            </div>
+                            <button class="iptal-btn" ${iptalDisabled} onclick="globalIptalEt('${child.key}', '${s.urun}')">İptal</button>
                         </div>
-                        <button class="iptal-btn" ${iptalDisabled} onclick="globalIptalEt('${child.key}', '${s.urun}')">İptal</button>
+                        ${notHTML}
                     </div>`;
                 }
             });
-            if (!siparisVar) liste.innerHTML = '<div class="empty-text">Henüz siparişiniz yok.</div>';
+            if (!siparisVar) liste.innerHTML = '<div class="empty-text">Aktif bir siparişiniz bulunmuyor.</div>';
         });
     }
 
-    function siparisVer(urunAdi, fiyat) {
-        if (masaNo === "Bilinmiyor") return alert("QR okutulmadı!");
-        if (confirm(`${urunAdi} siparişi verilsin mi?`)) {
-            const siparisRef = database.ref('siparisler').push();
-            const key = siparisRef.key;
-            const zaman = Date.now();
-            siparisRef.set({
-                masa: masaNo, urun: urunAdi, fiyat: fiyat,
-                saat: new Date().toLocaleTimeString('tr-TR'), zaman: zaman, durum: "Yeni"
-            }).then(() => {
-                localStorage.setItem('aura_kilitli_masa', masaNo);
-                const toastDiv = document.createElement('div');
-                toastDiv.id = `iptal-${key}`;
-                toastDiv.style.cssText = "position:fixed; bottom:30px; left:50%; transform:translateX(-50%); background:#bc6c25; color:white; padding:14px 28px; border-radius:12px; z-index:2000; font-weight:bold;";
-                toastDiv.innerHTML = `${urunAdi} eklendi <button onclick="globalIptalEt('${key}', '${urunAdi}')" style="background:white; color:#bc6c25; border:none; padding:6px 14px; border-radius:8px; margin-left:16px; font-weight:bold;">İPTAL ET</button>`;
-                document.body.appendChild(toastDiv);
-                setTimeout(() => { if (document.getElementById(`iptal-${key}`)) document.getElementById(`iptal-${key}`).remove(); }, 5 * 60 * 1000);
-            });
-        }
+    function siparisGonder(urunAdi, fiyat, not) {
+        if (masaNo === "Bilinmiyor") return alert("Lütfen masadaki QR kodu tekrar okutun!");
+        
+        const siparisRef = database.ref('siparisler').push();
+        const key = siparisRef.key;
+        
+        siparisRef.set({
+            masa: String(masaNo),
+            cihazID: cihazID, // Kilit için mühürleme
+            urun: urunAdi, 
+            fiyat: Number(fiyat),
+            not: not || "", 
+            saat: new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'}), 
+            zaman: Date.now(), 
+            durum: "Yeni"
+        }).then(() => {
+            const toast = document.createElement('div');
+            toast.id = `toast-${key}`;
+            toast.style.cssText = "position:fixed; bottom:30px; left:50%; transform:translateX(-50%); background:#28a745; color:white; padding:12px 25px; border-radius:30px; z-index:2000; font-weight:600; box-shadow: 0 5px 15px rgba(0,0,0,0.2); font-size:14px;";
+            toast.innerHTML = `${urunAdi} Siparişi Alındı! ${masaNo} `;
+            document.body.appendChild(toast);
+            setTimeout(() => { if(document.getElementById(`toast-${key}`)) document.getElementById(`toast-${key}`).remove(); }, 3000);
+        });
     }
 
     function globalIptalEt(key, urunAdi) {
-        if (confirm(`"${urunAdi}" iptal edilsin mi?`)) {
+        if (confirm(`"${urunAdi}" siparişini iptal etmek istiyor musunuz?`)) {
             database.ref('siparisler/' + key).remove().then(() => {
                 alert("Sipariş iptal edildi.");
-                const toast = document.getElementById(`iptal-${key}`);
-                if (toast) toast.remove();
             });
         }
     }
