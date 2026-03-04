@@ -22,7 +22,7 @@
 
         .detay-paneli { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); position: sticky; top: 20px; min-height: 500px; }
         
-        .siparis-item { padding: 10px 12px; border-radius: 12px; background: #fff; border: 1px solid #eee; margin-bottom: 8px; border-left: 6px solid var(--danger); }
+        .siparis-item { padding: 12px; border-radius: 12px; background: #fff; border: 1px solid #eee; margin-bottom: 8px; border-left: 6px solid var(--danger); }
         .siparis-item.teslim-edildi { border-left: 6px solid var(--success); background: #f8fff9; }
         
         .btn-teslim { background: var(--success); color: white; border: none; padding: 5px 12px; border-radius: 15px; cursor: pointer; font-size: 0.7rem; font-weight: 700; }
@@ -134,27 +134,54 @@
                 document.getElementById('islem-alani').style.display = mSips.length > 0 ? "block" : "none";
                 
                 let toplam = 0;
-                liste.innerHTML = "";
+                let gruplanmis = {};
 
+                // Gruplama Mantığı
                 mSips.forEach(s => {
                     toplam += Number(s.fiyat);
-                    // Sadece ürünleri göster, ödeme satırlarını listede gizle
                     if(s.tip !== "odeme") {
-                        const isTeslim = s.durum === "Teslim Edildi";
-                        liste.innerHTML += `
-                            <div class="siparis-item ${isTeslim ? 'teslim-edildi' : ''}">
-                                <div style="display:flex; justify-content:space-between;">
-                                    <b>${s.urun}</b>
-                                    <i class="fas fa-trash" style="color:red; font-size:0.8rem;" onclick="db.ref('siparisler/${s.id}').remove()"></i>
-                                </div>
-                                <div style="display:flex; justify-content:space-between; margin-top:5px;">
-                                    <span>${s.fiyat} TL</span>
-                                    <button class="btn-teslim ${isTeslim?'hazir':''}" onclick="db.ref('siparisler/${s.id}').update({durum:'Teslim Edildi'})">${isTeslim?'Teslim':'Teslim Et'}</button>
-                                </div>
-                            </div>`;
+                        let key = s.urun + "|" + s.durum;
+                        if(!gruplanmis[key]) {
+                            gruplanmis[key] = { urun: s.urun, durum: s.durum, adet: 1, fiyat: Number(s.fiyat), ids: [s.id] };
+                        } else {
+                            gruplanmis[key].adet++;
+                            gruplanmis[key].fiyat += Number(s.fiyat);
+                            gruplanmis[key].ids.push(s.id);
+                        }
                     }
                 });
+
+                liste.innerHTML = "";
+                Object.values(gruplanmis).forEach(g => {
+                    const isTeslim = g.durum === "Teslim Edildi";
+                    liste.innerHTML += `
+                        <div class="siparis-item ${isTeslim ? 'teslim-edildi' : ''}">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <div>
+                                    <b>${g.urun}</b> ${g.adet > 1 ? `<span style="background:var(--primary); color:white; padding:2px 6px; border-radius:6px; font-size:0.7rem; margin-left:5px;">x${g.adet}</span>` : ''}
+                                    <div style="font-size:0.85rem; color:#666;">${g.fiyat} TL</div>
+                                </div>
+                                <div style="display:flex; gap:10px; align-items:center;">
+                                    <button class="btn-teslim ${isTeslim?'hazir':''}" onclick="topluIslem('${g.ids.join(',')}', 'teslim')">
+                                        ${isTeslim ? 'Teslim' : 'Teslim Et'}
+                                    </button>
+                                    <i class="fas fa-trash" style="color:red; cursor:pointer; font-size:0.9rem;" onclick="topluIslem('${g.ids.join(',')}', 'sil')"></i>
+                                </div>
+                            </div>
+                        </div>`;
+                });
                 document.getElementById('masa-toplam').innerText = toplam + " TL";
+            }
+        }
+
+        function topluIslem(ids, tip) {
+            const idList = ids.split(',');
+            if(tip === 'teslim') {
+                idList.forEach(id => db.ref('siparisler/' + id).update({durum: 'Teslim Edildi'}));
+            } else if(tip === 'sil') {
+                if(confirm("Seçili ürünler silinsin mi?")) {
+                    idList.forEach(id => db.ref('siparisler/' + id).remove());
+                }
             }
         }
 
@@ -163,7 +190,6 @@
         function hizliOdeme(tur) {
             const val = document.getElementById('odeme-tutar').value;
             if(!val || val <= 0) return alert("Tutar gir!");
-            // Listeye ekleme yapıyoruz ama tip:"odeme" diyerek listede görünmesini engelliyoruz
             db.ref('siparisler').push({ urun: tur, fiyat: -Math.abs(val), masa: aktifMasa, durum: "Teslim Edildi", tip: "odeme", odemeTipi: tur });
             document.getElementById('odeme-tutar').value = "";
         }
@@ -218,7 +244,7 @@
         function arsivListele() {
             db.ref('arsiv').once('value', snap => {
                 let h = "";
-                snap.forEach(g => { h += `<button onclick="alert('${g.key} raporu için arşivi kontrol edin.')" style="width:100%; padding:8px; margin-bottom:5px;">${g.key}</button>`; });
+                snap.forEach(g => { h += `<button onclick="alert('${g.key} raporu için arşivi kontrol edin.')" style="width:100%; padding:8px; margin-bottom:5px; border:1px solid #ddd; border-radius:8px; cursor:pointer;">${g.key}</button>`; });
                 document.getElementById('modal-baslik').innerText = "Arşiv";
                 document.getElementById('modal-icerik').innerHTML = h || "Boş.";
                 document.getElementById('gunu-kapat-btn').style.display = "none";
