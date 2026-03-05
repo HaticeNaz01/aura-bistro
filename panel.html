@@ -241,15 +241,53 @@
             });
         }
 
-        function arsivListele() {
+       function arsivListele() {
+            const modalIcerik = document.getElementById('modal-icerik');
+            const modalBaslik = document.getElementById('modal-baslik');
+            modalBaslik.innerText = "Arşiv Kayıtları";
+            modalIcerik.innerHTML = "Yükleniyor...";
+            
             db.ref('arsiv').once('value', snap => {
-                let h = "";
-                snap.forEach(g => { h += `<button onclick="alert('${g.key} raporu için arşivi kontrol edin.')" style="width:100%; padding:8px; margin-bottom:5px; border:1px solid #ddd; border-radius:8px; cursor:pointer;">${g.key}</button>`; });
-                document.getElementById('modal-baslik').innerText = "Arşiv";
-                document.getElementById('modal-icerik').innerHTML = h || "Boş.";
+                let html = "";
+                if(!snap.exists()) {
+                    html = "<p style='color:orange'>Henüz arşivlenmiş bir kayıt bulunamadı.</p>";
+                } else {
+                    snap.forEach(gun => {
+                        // Her tarih için bir buton oluştur
+                        html += `
+                            <div style="margin-bottom:10px; border:1px solid #ddd; padding:10px; border-radius:10px; background:#f9f9f9;">
+                                <strong style="color:var(--accent)">Tarih: ${gun.key}</strong>
+                                <button onclick="gunlukDetayGoster('${gun.key}')" style="display:block; width:100%; margin-top:5px; padding:8px; background:var(--primary); color:white; border:none; border-radius:5px; cursor:pointer;">
+                                    Detayları Gör
+                                </button>
+                            </div>`;
+                    });
+                }
+                modalIcerik.innerHTML = html;
                 document.getElementById('gunu-kapat-btn').style.display = "none";
                 document.getElementById('modal').style.display = 'block';
                 document.getElementById('overlay').style.display = 'block';
+            }).catch(err => {
+                modalIcerik.innerHTML = "Hata: " + err.message;
+            });
+        }
+
+        // Arşivdeki belirli bir günün detaylarını görmek için bu yardımcı fonksiyonu da ekle:
+        function gunlukDetayGoster(tarih) {
+            db.ref('arsiv/' + tarih).once('value', snap => {
+                let liste = `<ul style="text-align:left; font-size:0.9rem; padding-left:20px;">`;
+                let gunlukToplam = 0;
+                snap.forEach(islem => {
+                    const data = islem.val();
+                    const fiyat = Number(data.fiyat);
+                    // Sadece pozitif fiyatları (ürünleri) toplayalım veya hepsini net kar olarak gösterelim
+                    gunlukToplam += fiyat;
+                    liste += `<li>Masa ${data.masa}: ${data.urun} (${fiyat} TL)</li>`;
+                });
+                liste += `</ul><hr><strong>Toplam Ciro: ${gunlukToplam} TL</strong>`;
+                
+                document.getElementById('modal-icerik').innerHTML = liste;
+                document.getElementById('modal-baslik').innerText = tarih + " Detayı";
             });
         }
 
